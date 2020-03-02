@@ -78,9 +78,24 @@ public class TencentService {
      * @param syncResultDTO
      * @return
      */
-    public String syncGetUserInfo(SyncResultDTO syncResultDTO) {
+    public String syncGetUserInfo(SyncResultDTO syncResultDTO) throws IOException {
 
-        return "srt";
+        String nonce = UUID.randomUUID().toString().replaceAll("-","");
+
+        List<String> signList = new ArrayList<>(6);
+        signList.add(TencentConstant.APPID);
+        signList.add(syncResultDTO.getOrder_no());
+        signList.add("1.0.0");
+        signList.add(nonce);
+
+        String sign = sign(signList,getTicket());
+
+        StringBuffer stringBuffer = new StringBuffer(TencentConstant.SYNC_QUERY_URL)
+                .append("?app_id=").append(TencentConstant.APPID)
+                .append("&nonce=").append(nonce)
+                .append("&order_no=").append(syncResultDTO.getOrder_no())
+                .append("&version=1.0.0").append("&sign=").append(sign);
+        return  OkHttp.get(stringBuffer.toString());
     }
 
     /**
